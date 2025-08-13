@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,47 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function ProfileScreen() {
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  const handleTakePhoto = async () => {
+    try {
+      // 请求相机权限
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('权限不足', '需要相机权限才能拍照');
+        return;
+      }
+
+      // 启动相机
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setAvatarUri(result.assets[0].uri);
+        Alert.alert('成功', '头像已更新！');
+      }
+    } catch (error) {
+      Alert.alert('错误', '拍照失败，请重试');
+      console.error('拍照错误:', error);
+    }
+  };
+
   const handleMenuPress = (title: string) => {
-    Alert.alert('提示', `您点击了 ${title}`);
+    if (title === '编辑资料') {
+      handleTakePhoto();
+    } else {
+      Alert.alert('提示', `您点击了 ${title}`);
+    }
   };
 
   const menuItems = [
@@ -29,7 +64,11 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Ionicons name="person" size={40} color="white" />
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatarImage} />
+            ) : (
+              <Ionicons name="person" size={40} color="white" />
+            )}
           </View>
         </View>
         <Text style={styles.userName}>用户名</Text>
@@ -121,6 +160,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#34C759',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
   },
   userName: {
     fontSize: 22,
