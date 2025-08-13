@@ -28,6 +28,8 @@
 ### 个人中心
 ![个人中心截图](docs/profile-screen.png)
 
+![启动相机](docs/launch-camera.png)
+
 ### 所有组件
 
 ![所有组件](docs/ALL.JPEG)
