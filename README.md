@@ -82,14 +82,14 @@ EAS Build 是 Expo 的现代化云端构建服务，支持自动化构建和分�
 #### 1. 安装和配置
 ```bash
 # 安装 EAS CLI
-npm install -g @expo/eas-cli
-
-# 登录 Expo 账户
-eas login
-
-# 初始化 EAS 配置
-eas build:configure
+npm install --global eas-cli
 ```
+
+登陆(参考官网：https://expo.dev/)
+```bash
+eas init --id [BUILD_ID]
+```
+
 
 #### 2. 构建应用
 ```bash
