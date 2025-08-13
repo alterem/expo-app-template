@@ -11,14 +11,35 @@ import {
 } from 'react-native';
 import { HitokotoData } from '../types';
 
+// 类型映射
+const typeMap: { [key: string]: string } = {
+  all: '所有类型',
+  a: '动画',
+  b: '漫画',
+  c: '游戏',
+  d: '文学',
+  e: '原创',
+  f: '来自网络',
+  g: '其他',
+  h: '影视',
+  i: '诗词',
+  j: '网易云',
+  k: '哲学',
+  l: '抖机灵'
+};
+
 export default function HomeScreen() {
   const [hitokoto, setHitokoto] = useState<HitokotoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedType, setSelectedType] = useState<string>('all');
 
-  const fetchHitokoto = async () => {
+  const fetchHitokoto = async (type: string = selectedType) => {
     try {
-      const response = await fetch('https://v1.hitokoto.cn/');
+      const url = type === 'all'
+        ? 'https://v1.hitokoto.cn/'
+        : `https://v1.hitokoto.cn/?c=${type}`;
+      const response = await fetch(url);
       const data: HitokotoData = await response.json();
       setHitokoto(data);
     } catch (error) {
@@ -37,6 +58,12 @@ export default function HomeScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchHitokoto();
+  };
+
+  const handleTypeChange = (type: string) => {
+    setSelectedType(type);
+    setLoading(true);
+    fetchHitokoto(type);
   };
 
   const formatDate = (timestamp: string) => {
@@ -67,6 +94,35 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>今日一言</Text>
         <Text style={styles.subtitle}>每日精选句子</Text>
+      </View>
+
+      {/* 类型选择器 */}
+      <View style={styles.typeSelector}>
+        <Text style={styles.typeSelectorTitle}>选择类型：</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.typeScrollView}
+          contentContainerStyle={styles.typeScrollContent}
+        >
+          {Object.entries(typeMap).map(([key, value]) => (
+            <TouchableOpacity
+              key={key}
+              style={[
+                styles.typeButton,
+                selectedType === key && styles.typeButtonActive
+              ]}
+              onPress={() => handleTypeChange(key)}
+            >
+              <Text style={[
+                styles.typeButtonText,
+                selectedType === key && styles.typeButtonTextActive
+              ]}>
+                {value}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {hitokoto && (
@@ -107,18 +163,15 @@ export default function HomeScreen() {
       )}
 
       <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
-        <Text style={styles.refreshButtonText}>获取新的一言</Text>
+        <Text style={styles.refreshButtonText}>
+          {selectedType === 'all' ? '获取新的一言' : `获取新的${typeMap[selectedType]}一言`}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 function getTypeText(type: string): string {
-  const typeMap: { [key: string]: string } = {
-    a: '动画', b: '漫画', c: '游戏', d: '文学', 
-    e: '原创', f: '来自网络', g: '其他', 
-    h: '影视', i: '诗词', j: '网易云', k: '哲学', l: '抖机灵'
-  };
   return typeMap[type] || '未知';
 }
 
@@ -207,5 +260,50 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '500',
+  },
+  typeSelector: {
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  typeSelectorTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  typeScrollView: {
+    flexGrow: 0,
+  },
+  typeScrollContent: {
+    paddingRight: 10,
+  },
+  typeButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  typeButtonActive: {
+    backgroundColor: '#34C759',
+    borderColor: '#34C759',
+  },
+  typeButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  typeButtonTextActive: {
+    color: 'white',
   },
 });
