@@ -4,8 +4,12 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild --platform android --clean",
+    "prebuild-ios": "expo prebuild --platform ios --clean",
+    "build": "cd android && ./gradlew assembleRelease",
+    "build-ios": "cd ios && xcodebuild -project hitokotoapp.xcodeproj -scheme hitokotoapp -configuration Release -destination generic/platform=iOS -archivePath hitokotoapp.xcarchive archive"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
